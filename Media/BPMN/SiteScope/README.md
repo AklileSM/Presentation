@@ -1,0 +1,41 @@
+# SiteScope BPMN diagrams (redrawn from the code)
+
+These replace the diagrams in `SiteScope/BPMNs/`, which were last updated in May and July 2026 and no longer
+match the platform. Each diagram was checked against the `wizard-and-assistant` branch (commit `7a7a111`, the
+most recent branch; it already contains `map-wizard` and `robot-assistant`).
+
+Every `.bpmn` file is standard BPMN 2.0 with layout information, so it opens and can be edited in
+[bpmn.io](https://demo.bpmn.io) or Camunda Modeler. The `.png` next to it is the same diagram rendered with
+bpmn.io's viewer.
+
+| # | Diagram | What changed from the old version |
+|---|---|---|
+| 01 | Master overview | Adds the project-owner robot tasks (pairing, map, capture points, schedules), a Robot lane for scheduled missions, and the voice assistant. |
+| 02 | Joining the platform | Adds the "username or email already registered" refusal; notes that robot accounts are created by an admin, not registered. |
+| 03 | Project setup | The Create project wizard is now four steps: Details → Rooms → Floor plan → Room pins. The slug is generated from the name (not typed). A duplicate name is refused per owner. Members are added from Settings › Members; robot setup from Settings › Setup. |
+| 04 | Upload | Adds the robot upload path (`POST /api/upload/robot`: robot must be Owner / Editor, room must exist, robot metadata stored, activity tagged `source: robot`). |
+| 05 | Point cloud conversion | Retry is the `retry-conversion` endpoint; otherwise unchanged. |
+| 06 | Browse and view | Adds "My uploads" and the two CSV exports (robot capture quality, mission outcomes). |
+| 07 | AI analysis | Analysis starts automatically on upload (status Generating); the prompt has SCENE / QUALITY ISSUES / SAFETY ISSUES sections; any OpenAI-compatible vision endpoint. |
+| 08 | Annotations | Matches the code: the UI hides tools from Viewers and limits edit / delete to the pin's creator or an admin. **The API enforces neither** (see below). |
+| 09 | Field report | Unchanged in substance; redrawn for consistency. |
+| 10 | Robot onboarding, map and capture points | **New.** Pairing token → agent claim → heartbeat; map upload or "Record a new map" wizard (SLAM, drive, save at home within 30 cm / 15°); old capture points retired; place capture points. Replaces the old robot task flow. |
+| 11 | Schedule to mission | **New.** Dispatcher every 15 s: missed (> 30 min late), invalid (robot not Editor, point missing or on an old map → schedule disabled), skipped (busy, or camera / LiDAR unavailable), else queue mission and, if needed, a Connect command. |
+| 12 | Mission execution | **New.** Nav2 health check, per-capture-point navigate → capture → quality gate (observe / retry, up to 3 attempts) → robot upload; continue-on-failure; return home; cancel / stop and the 2-minute watchdog; final status. |
+| 13 | Robot voice assistant | **New.** Browser speech recognition → rule-based or LLM tool-calling assistant (`ASSISTANT_AGENT` = off / schedules / all) → validation and read-back confirmations → Robots page endpoints; spoken reply from Kokoro TTS or the browser voice. |
+
+## Issue found while checking the code
+
+`backend/app/api/annotations.py` has no role or ownership checks: any logged-in user can create, edit or delete
+any annotation, and `GET /api/annotations/file/{file_id}` needs no login at all. The frontend comment in
+`StaticViewer.tsx` says it "mirrors the backend's `_require_owner`", but no branch contains `_require_owner`.
+`backend/PERMISSIONS.md` already notes the missing ownership check.
+
+## Regenerating
+
+```bash
+cd tools
+npm install bpmn-js@17.11.1 playwright      # renderer
+python3 diagrams_robot.py ../ && python3 diagrams_platform.py ../
+node render.js .. ../*.bpmn
+```

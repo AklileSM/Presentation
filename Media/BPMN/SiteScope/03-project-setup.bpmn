@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Defs_03" targetNamespace="https://sitescope.smart-crg.com/bpmn" exporter="SiteScope BPMN generator" exporterVersion="1.0">
+<bpmn:collaboration id="Collab_03"><bpmn:participant id="Pool_03" name="03 · Setting up a project and inviting the team" processRef="Process_03"/>
+</bpmn:collaboration>
+<bpmn:process id="Process_03" isExecutable="false">
+<bpmn:laneSet id="LaneSet_03">
+<bpmn:lane id="Lane_o" name="Project owner (Create project wizard, then Settings)"><bpmn:flowNodeRef>s0</bpmn:flowNodeRef><bpmn:flowNodeRef>det</bpmn:flowNodeRef><bpmn:flowNodeRef>rooms</bpmn:flowNodeRef><bpmn:flowNodeRef>fp</bpmn:flowNodeRef><bpmn:flowNodeRef>up</bpmn:flowNodeRef><bpmn:flowNodeRef>pins</bpmn:flowNodeRef><bpmn:flowNodeRef>j</bpmn:flowNodeRef><bpmn:flowNodeRef>mem</bpmn:flowNodeRef><bpmn:flowNodeRef>rob</bpmn:flowNodeRef><bpmn:flowNodeRef>setup</bpmn:flowNodeRef><bpmn:flowNodeRef>j2</bpmn:flowNodeRef><bpmn:flowNodeRef>ready</bpmn:flowNodeRef></bpmn:lane>
+<bpmn:lane id="Lane_s" name="SiteScope backend"><bpmn:flowNodeRef>dup</bpmn:flowNodeRef><bpmn:flowNodeRef>ref</bpmn:flowNodeRef><bpmn:flowNodeRef>cr</bpmn:flowNodeRef><bpmn:flowNodeRef>log</bpmn:flowNodeRef></bpmn:lane>
+</bpmn:laneSet>
+<bpmn:startEvent id="s0" name="New project"><bpmn:outgoing>Flow_1</bpmn:outgoing></bpmn:startEvent>
+<bpmn:userTask id="det" name="Step 1, Details: name, description, location"><bpmn:incoming>Flow_1</bpmn:incoming><bpmn:outgoing>Flow_2</bpmn:outgoing></bpmn:userTask>
+<bpmn:exclusiveGateway id="dup" name="You already own a project with this name?"><bpmn:incoming>Flow_2</bpmn:incoming><bpmn:outgoing>Flow_3</bpmn:outgoing><bpmn:outgoing>Flow_4</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:endEvent id="ref" name="Pick another name"><bpmn:incoming>Flow_3</bpmn:incoming><bpmn:errorEventDefinition id="EED_ref"/></bpmn:endEvent>
+<bpmn:serviceTask id="cr" name="Create project with an auto-generated unique slug; make you its Owner"><bpmn:incoming>Flow_4</bpmn:incoming><bpmn:outgoing>Flow_5</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:userTask id="rooms" name="Step 2, Rooms: add each location (e.g. Ground floor, Stairwell B)"><bpmn:incoming>Flow_5</bpmn:incoming><bpmn:outgoing>Flow_6</bpmn:outgoing></bpmn:userTask>
+<bpmn:exclusiveGateway id="fp" name="Upload a floor plan? (step 3)"><bpmn:incoming>Flow_6</bpmn:incoming><bpmn:outgoing>Flow_7</bpmn:outgoing><bpmn:outgoing>Flow_10</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:userTask id="up" name="Upload floor plan image"><bpmn:incoming>Flow_7</bpmn:incoming><bpmn:outgoing>Flow_8</bpmn:outgoing></bpmn:userTask>
+<bpmn:userTask id="pins" name="Step 4, Room pins: place each room on the floor plan"><bpmn:incoming>Flow_8</bpmn:incoming><bpmn:outgoing>Flow_9</bpmn:outgoing></bpmn:userTask>
+<bpmn:exclusiveGateway id="j" name=""><bpmn:incoming>Flow_9</bpmn:incoming><bpmn:incoming>Flow_10</bpmn:incoming><bpmn:outgoing>Flow_11</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:userTask id="mem" name="Settings › Members: search a registered user and add as Owner, Editor or Viewer"><bpmn:incoming>Flow_11</bpmn:incoming><bpmn:outgoing>Flow_12</bpmn:outgoing></bpmn:userTask>
+<bpmn:serviceTask id="log" name="Record membership changes in the activity feed"><bpmn:incoming>Flow_12</bpmn:incoming><bpmn:outgoing>Flow_13</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:exclusiveGateway id="rob" name="Will a robot inspect this site?"><bpmn:incoming>Flow_13</bpmn:incoming><bpmn:outgoing>Flow_14</bpmn:outgoing><bpmn:outgoing>Flow_16</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:userTask id="setup" name="Settings › Setup: pair robot, robot map and capture points (diagram 10)"><bpmn:incoming>Flow_14</bpmn:incoming><bpmn:outgoing>Flow_15</bpmn:outgoing></bpmn:userTask>
+<bpmn:exclusiveGateway id="j2" name=""><bpmn:incoming>Flow_15</bpmn:incoming><bpmn:incoming>Flow_16</bpmn:incoming><bpmn:outgoing>Flow_17</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:endEvent id="ready" name="Project ready for the team"><bpmn:incoming>Flow_17</bpmn:incoming></bpmn:endEvent>
+<bpmn:sequenceFlow id="Flow_1" sourceRef="s0" targetRef="det"/>
+<bpmn:sequenceFlow id="Flow_2" sourceRef="det" targetRef="dup"/>
+<bpmn:sequenceFlow id="Flow_3" name="Yes" sourceRef="dup" targetRef="ref"/>
+<bpmn:sequenceFlow id="Flow_4" name="No" sourceRef="dup" targetRef="cr"/>
+<bpmn:sequenceFlow id="Flow_5" sourceRef="cr" targetRef="rooms"/>
+<bpmn:sequenceFlow id="Flow_6" sourceRef="rooms" targetRef="fp"/>
+<bpmn:sequenceFlow id="Flow_7" name="Yes" sourceRef="fp" targetRef="up"/>
+<bpmn:sequenceFlow id="Flow_8" sourceRef="up" targetRef="pins"/>
+<bpmn:sequenceFlow id="Flow_9" sourceRef="pins" targetRef="j"/>
+<bpmn:sequenceFlow id="Flow_10" name="Skip" sourceRef="fp" targetRef="j"/>
+<bpmn:sequenceFlow id="Flow_11" sourceRef="j" targetRef="mem"/>
+<bpmn:sequenceFlow id="Flow_12" sourceRef="mem" targetRef="log"/>
+<bpmn:sequenceFlow id="Flow_13" sourceRef="log" targetRef="rob"/>
+<bpmn:sequenceFlow id="Flow_14" name="Yes" sourceRef="rob" targetRef="setup"/>
+<bpmn:sequenceFlow id="Flow_15" sourceRef="setup" targetRef="j2"/>
+<bpmn:sequenceFlow id="Flow_16" name="No" sourceRef="rob" targetRef="j2"/>
+<bpmn:sequenceFlow id="Flow_17" sourceRef="j2" targetRef="ready"/>
+<bpmn:textAnnotation id="Note_1"><bpmn:text>Owner: everything, including settings and members. Editor: upload, delete, annotate, publish reports. Viewer: read-only. Admins see every project.</bpmn:text></bpmn:textAnnotation>
+<bpmn:association id="Assoc_1" sourceRef="mem" targetRef="Note_1"/>
+</bpmn:process>
+<bpmndi:BPMNDiagram id="Diagram_03"><bpmndi:BPMNPlane id="Plane_03" bpmnElement="Collab_03">
+<bpmndi:BPMNShape id="Pool_03_di" bpmnElement="Pool_03" isHorizontal="true"><dc:Bounds x="20" y="20" width="2840" height="515"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Lane_o_di" bpmnElement="Lane_o" isHorizontal="true"><dc:Bounds x="50" y="20" width="2810" height="320"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Lane_s_di" bpmnElement="Lane_s" isHorizontal="true"><dc:Bounds x="50" y="340" width="2810" height="195"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="s0_di" bpmnElement="s0"><dc:Bounds x="192" y="100" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="150" y="142" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="det_di" bpmnElement="det"><dc:Bounds x="310" y="72" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="dup_di" bpmnElement="dup" isMarkerVisible="true"><dc:Bounds x="535" y="412" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="500" y="364" width="120" height="42"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="ref_di" bpmnElement="ref"><dc:Bounds x="700" y="420" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="658" y="462" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="cr_di" bpmnElement="cr"><dc:Bounds x="800" y="392" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="rooms_di" bpmnElement="rooms"><dc:Bounds x="975" y="72" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="fp_di" bpmnElement="fp" isMarkerVisible="true"><dc:Bounds x="1200" y="92" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="1165" y="58" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="up_di" bpmnElement="up"><dc:Bounds x="1325" y="198" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="pins_di" bpmnElement="pins"><dc:Bounds x="1500" y="198" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="j_di" bpmnElement="j" isMarkerVisible="true"><dc:Bounds x="1725" y="92" width="50" height="50"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="mem_di" bpmnElement="mem"><dc:Bounds x="1850" y="72" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="log_di" bpmnElement="log"><dc:Bounds x="2025" y="392" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="rob_di" bpmnElement="rob" isMarkerVisible="true"><dc:Bounds x="2250" y="92" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="2215" y="58" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="setup_di" bpmnElement="setup"><dc:Bounds x="2375" y="198" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="j2_di" bpmnElement="j2" isMarkerVisible="true"><dc:Bounds x="2600" y="92" width="50" height="50"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="ready_di" bpmnElement="ready"><dc:Bounds x="2764" y="100" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="2722" y="142" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1"><di:waypoint x="228" y="118"/><di:waypoint x="310" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2"><di:waypoint x="460" y="118"/><di:waypoint x="498" y="118"/><di:waypoint x="498" y="438"/><di:waypoint x="535" y="438"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3"><di:waypoint x="585" y="438"/><di:waypoint x="700" y="438"/><bpmndi:BPMNLabel><dc:Bounds x="648" y="418" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4"><di:waypoint x="560" y="462"/><di:waypoint x="560" y="510"/><di:waypoint x="875" y="510"/><di:waypoint x="875" y="482"/><bpmndi:BPMNLabel><dc:Bounds x="568" y="468" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5"><di:waypoint x="950" y="438"/><di:waypoint x="962" y="438"/><di:waypoint x="962" y="118"/><di:waypoint x="975" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6"><di:waypoint x="1125" y="118"/><di:waypoint x="1200" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7"><di:waypoint x="1225" y="142"/><di:waypoint x="1225" y="242"/><di:waypoint x="1325" y="242"/><bpmndi:BPMNLabel><dc:Bounds x="1231" y="186" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8"><di:waypoint x="1475" y="242"/><di:waypoint x="1500" y="242"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9"><di:waypoint x="1650" y="242"/><di:waypoint x="1750" y="242"/><di:waypoint x="1750" y="142"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10"><di:waypoint x="1250" y="118"/><di:waypoint x="1725" y="118"/><bpmndi:BPMNLabel><dc:Bounds x="1494" y="98" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11"><di:waypoint x="1775" y="118"/><di:waypoint x="1850" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_12_di" bpmnElement="Flow_12"><di:waypoint x="2000" y="118"/><di:waypoint x="2012" y="118"/><di:waypoint x="2012" y="438"/><di:waypoint x="2025" y="438"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_13_di" bpmnElement="Flow_13"><di:waypoint x="2175" y="438"/><di:waypoint x="2212" y="438"/><di:waypoint x="2212" y="118"/><di:waypoint x="2250" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_14_di" bpmnElement="Flow_14"><di:waypoint x="2275" y="142"/><di:waypoint x="2275" y="242"/><di:waypoint x="2375" y="242"/><bpmndi:BPMNLabel><dc:Bounds x="2281" y="186" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_15_di" bpmnElement="Flow_15"><di:waypoint x="2525" y="242"/><di:waypoint x="2625" y="242"/><di:waypoint x="2625" y="142"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_16_di" bpmnElement="Flow_16"><di:waypoint x="2300" y="118"/><di:waypoint x="2600" y="118"/><bpmndi:BPMNLabel><dc:Bounds x="2456" y="98" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_17_di" bpmnElement="Flow_17"><di:waypoint x="2650" y="118"/><di:waypoint x="2764" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNShape id="Note_1_di" bpmnElement="Note_1"><dc:Bounds x="1785" y="205" width="300" height="68"/></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="Assoc_1_di" bpmnElement="Assoc_1"><di:waypoint x="1925" y="162"/><di:waypoint x="1925" y="205"/></bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>

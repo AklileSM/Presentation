@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Defs_07" targetNamespace="https://sitescope.smart-crg.com/bpmn" exporter="SiteScope BPMN generator" exporterVersion="1.0">
+<bpmn:collaboration id="Collab_07"><bpmn:participant id="Pool_07" name="07 · Analysing an image with AI" processRef="Process_07"/>
+</bpmn:collaboration>
+<bpmn:process id="Process_07" isExecutable="false">
+<bpmn:laneSet id="LaneSet_07">
+<bpmn:lane id="Lane_u" name="Viewer (browser)"><bpmn:flowNodeRef>open</bpmn:flowNodeRef><bpmn:flowNodeRef>ask</bpmn:flowNodeRef><bpmn:flowNodeRef>poll</bpmn:flowNodeRef><bpmn:flowNodeRef>show</bpmn:flowNodeRef><bpmn:flowNodeRef>e</bpmn:flowNodeRef></bpmn:lane>
+<bpmn:lane id="Lane_s" name="SiteScope backend"><bpmn:flowNodeRef>st</bpmn:flowNodeRef><bpmn:flowNodeRef>ret</bpmn:flowNodeRef><bpmn:flowNodeRef>run_q</bpmn:flowNodeRef><bpmn:flowNodeRef>inprog</bpmn:flowNodeRef><bpmn:flowNodeRef>up</bpmn:flowNodeRef><bpmn:flowNodeRef>bg</bpmn:flowNodeRef><bpmn:flowNodeRef>done</bpmn:flowNodeRef></bpmn:lane>
+<bpmn:lane id="Lane_m" name="Vision model (OpenAI-compatible: local Ollama or cloud)"><bpmn:flowNodeRef>run</bpmn:flowNodeRef><bpmn:flowNodeRef>got</bpmn:flowNodeRef><bpmn:flowNodeRef>failed</bpmn:flowNodeRef><bpmn:flowNodeRef>fe</bpmn:flowNodeRef></bpmn:lane>
+</bpmn:laneSet>
+<bpmn:startEvent id="open" name="User opens the image"><bpmn:outgoing>Flow_1</bpmn:outgoing></bpmn:startEvent>
+<bpmn:serviceTask id="ask" name="Request the AI description"><bpmn:incoming>Flow_1</bpmn:incoming><bpmn:incoming>Flow_8</bpmn:incoming><bpmn:outgoing>Flow_2</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:exclusiveGateway id="st" name="Description stored?"><bpmn:incoming>Flow_2</bpmn:incoming><bpmn:outgoing>Flow_3</bpmn:outgoing><bpmn:outgoing>Flow_4</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:serviceTask id="ret" name="Return the stored description"><bpmn:incoming>Flow_3</bpmn:incoming><bpmn:outgoing>Flow_16</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:exclusiveGateway id="run_q" name="Analysis already running?"><bpmn:incoming>Flow_4</bpmn:incoming><bpmn:outgoing>Flow_5</bpmn:outgoing><bpmn:outgoing>Flow_6</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:serviceTask id="inprog" name="Reply “in progress” (202)"><bpmn:incoming>Flow_5</bpmn:incoming><bpmn:outgoing>Flow_7</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:serviceTask id="poll" name="Poll every 2 s"><bpmn:incoming>Flow_7</bpmn:incoming><bpmn:outgoing>Flow_8</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:startEvent id="up" name="Image uploaded (by a person or the robot)"><bpmn:outgoing>Flow_9</bpmn:outgoing><bpmn:messageEventDefinition id="MED_up"/></bpmn:startEvent>
+<bpmn:serviceTask id="bg" name="Mark Generating; start background analysis"><bpmn:incoming>Flow_9</bpmn:incoming><bpmn:outgoing>Flow_10</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:serviceTask id="run" name="Send the image with the SCENE / QUALITY ISSUES / SAFETY ISSUES prompt"><bpmn:incoming>Flow_6</bpmn:incoming><bpmn:incoming>Flow_10</bpmn:incoming><bpmn:outgoing>Flow_11</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:exclusiveGateway id="got" name="Description returned?"><bpmn:incoming>Flow_11</bpmn:incoming><bpmn:outgoing>Flow_12</bpmn:outgoing><bpmn:outgoing>Flow_13</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:serviceTask id="done" name="Save description; status Done"><bpmn:incoming>Flow_12</bpmn:incoming><bpmn:outgoing>Flow_15</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:serviceTask id="failed" name="Status Failed; uploads, viewing and reports are unaffected"><bpmn:incoming>Flow_13</bpmn:incoming><bpmn:outgoing>Flow_14</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:endEvent id="fe" name="No description"><bpmn:incoming>Flow_14</bpmn:incoming></bpmn:endEvent>
+<bpmn:userTask id="show" name="Show the description in the viewer"><bpmn:incoming>Flow_15</bpmn:incoming><bpmn:incoming>Flow_16</bpmn:incoming><bpmn:outgoing>Flow_17</bpmn:outgoing></bpmn:userTask>
+<bpmn:endEvent id="e" name="AI description visible"><bpmn:incoming>Flow_17</bpmn:incoming></bpmn:endEvent>
+<bpmn:sequenceFlow id="Flow_1" sourceRef="open" targetRef="ask"/>
+<bpmn:sequenceFlow id="Flow_2" sourceRef="ask" targetRef="st"/>
+<bpmn:sequenceFlow id="Flow_3" name="Yes" sourceRef="st" targetRef="ret"/>
+<bpmn:sequenceFlow id="Flow_4" name="No" sourceRef="st" targetRef="run_q"/>
+<bpmn:sequenceFlow id="Flow_5" name="Yes" sourceRef="run_q" targetRef="inprog"/>
+<bpmn:sequenceFlow id="Flow_6" name="No" sourceRef="run_q" targetRef="run"/>
+<bpmn:sequenceFlow id="Flow_7" sourceRef="inprog" targetRef="poll"/>
+<bpmn:sequenceFlow id="Flow_8" sourceRef="poll" targetRef="ask"/>
+<bpmn:sequenceFlow id="Flow_9" sourceRef="up" targetRef="bg"/>
+<bpmn:sequenceFlow id="Flow_10" sourceRef="bg" targetRef="run"/>
+<bpmn:sequenceFlow id="Flow_11" sourceRef="run" targetRef="got"/>
+<bpmn:sequenceFlow id="Flow_12" name="Yes" sourceRef="got" targetRef="done"/>
+<bpmn:sequenceFlow id="Flow_13" name="No" sourceRef="got" targetRef="failed"/>
+<bpmn:sequenceFlow id="Flow_14" sourceRef="failed" targetRef="fe"/>
+<bpmn:sequenceFlow id="Flow_15" sourceRef="done" targetRef="show"/>
+<bpmn:sequenceFlow id="Flow_16" sourceRef="ret" targetRef="show"/>
+<bpmn:sequenceFlow id="Flow_17" sourceRef="show" targetRef="e"/>
+</bpmn:process>
+<bpmndi:BPMNDiagram id="Diagram_07"><bpmndi:BPMNPlane id="Plane_07" bpmnElement="Collab_07">
+<bpmndi:BPMNShape id="Pool_07_di" bpmnElement="Pool_07" isHorizontal="true"><dc:Bounds x="20" y="20" width="1493" height="835"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Lane_u_di" bpmnElement="Lane_u" isHorizontal="true"><dc:Bounds x="50" y="20" width="1463" height="195"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Lane_s_di" bpmnElement="Lane_s" isHorizontal="true"><dc:Bounds x="50" y="215" width="1463" height="445"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Lane_m_di" bpmnElement="Lane_m" isHorizontal="true"><dc:Bounds x="50" y="660" width="1463" height="195"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="open_di" bpmnElement="open"><dc:Bounds x="192" y="100" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="150" y="142" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="ask_di" bpmnElement="ask"><dc:Bounds x="310" y="72" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="st_di" bpmnElement="st" isMarkerVisible="true"><dc:Bounds x="535" y="288" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="500" y="254" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="ret_di" bpmnElement="ret"><dc:Bounds x="660" y="268" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="run_q_di" bpmnElement="run_q" isMarkerVisible="true"><dc:Bounds x="710" y="412" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="675" y="378" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="inprog_di" bpmnElement="inprog"><dc:Bounds x="835" y="392" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="poll_di" bpmnElement="poll"><dc:Bounds x="1010" y="72" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="up_di" bpmnElement="up"><dc:Bounds x="192" y="544" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="150" y="586" width="120" height="42"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bg_di" bpmnElement="bg"><dc:Bounds x="310" y="518" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="run_di" bpmnElement="run"><dc:Bounds x="835" y="712" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="got_di" bpmnElement="got" isMarkerVisible="true"><dc:Bounds x="1060" y="732" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="1025" y="788" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="done_di" bpmnElement="done"><dc:Bounds x="1185" y="392" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="failed_di" bpmnElement="failed"><dc:Bounds x="1185" y="712" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="fe_di" bpmnElement="fe"><dc:Bounds x="1417" y="740" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="1375" y="782" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="show_di" bpmnElement="show"><dc:Bounds x="1185" y="72" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="e_di" bpmnElement="e"><dc:Bounds x="1417" y="100" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="1375" y="142" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1"><di:waypoint x="228" y="118"/><di:waypoint x="310" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2"><di:waypoint x="460" y="118"/><di:waypoint x="498" y="118"/><di:waypoint x="498" y="312"/><di:waypoint x="535" y="312"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3"><di:waypoint x="585" y="312"/><di:waypoint x="660" y="312"/><bpmndi:BPMNLabel><dc:Bounds x="628" y="292" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4"><di:waypoint x="560" y="338"/><di:waypoint x="560" y="438"/><di:waypoint x="710" y="438"/><bpmndi:BPMNLabel><dc:Bounds x="566" y="380" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5"><di:waypoint x="760" y="438"/><di:waypoint x="835" y="438"/><bpmndi:BPMNLabel><dc:Bounds x="804" y="418" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6"><di:waypoint x="735" y="462"/><di:waypoint x="735" y="758"/><di:waypoint x="835" y="758"/><bpmndi:BPMNLabel><dc:Bounds x="743" y="468" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7"><di:waypoint x="985" y="438"/><di:waypoint x="998" y="438"/><di:waypoint x="998" y="118"/><di:waypoint x="1010" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8"><di:waypoint x="1085" y="72"/><di:waypoint x="1085" y="44"/><di:waypoint x="385" y="44"/><di:waypoint x="385" y="72"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9"><di:waypoint x="228" y="562"/><di:waypoint x="310" y="562"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10"><di:waypoint x="460" y="562"/><di:waypoint x="910" y="562"/><di:waypoint x="910" y="712"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11"><di:waypoint x="985" y="758"/><di:waypoint x="1060" y="758"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_12_di" bpmnElement="Flow_12"><di:waypoint x="1085" y="732"/><di:waypoint x="1085" y="438"/><di:waypoint x="1185" y="438"/><bpmndi:BPMNLabel><dc:Bounds x="1091" y="578" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_13_di" bpmnElement="Flow_13"><di:waypoint x="1110" y="758"/><di:waypoint x="1185" y="758"/><bpmndi:BPMNLabel><dc:Bounds x="1154" y="738" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_14_di" bpmnElement="Flow_14"><di:waypoint x="1335" y="758"/><di:waypoint x="1417" y="758"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_15_di" bpmnElement="Flow_15"><di:waypoint x="1260" y="392"/><di:waypoint x="1260" y="162"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_16_di" bpmnElement="Flow_16"><di:waypoint x="810" y="312"/><di:waypoint x="1260" y="312"/><di:waypoint x="1260" y="162"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_17_di" bpmnElement="Flow_17"><di:waypoint x="1335" y="118"/><di:waypoint x="1417" y="118"/></bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>

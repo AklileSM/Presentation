@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Defs_10" targetNamespace="https://sitescope.smart-crg.com/bpmn" exporter="SiteScope BPMN generator" exporterVersion="1.0">
+<bpmn:collaboration id="Collab_10"><bpmn:participant id="Pool_10" name="10 · Robot onboarding, map and capture points (one-time setup)" processRef="Process_10"/>
+</bpmn:collaboration>
+<bpmn:process id="Process_10" isExecutable="false">
+<bpmn:laneSet id="LaneSet_10">
+<bpmn:lane id="Lane_own" name="Project owner / Admin (web app)"><bpmn:flowNodeRef>s</bpmn:flowNodeRef><bpmn:flowNodeRef>acct</bpmn:flowNodeRef><bpmn:flowNodeRef>tok</bpmn:flowNodeRef><bpmn:flowNodeRef>how</bpmn:flowNodeRef><bpmn:flowNodeRef>upl</bpmn:flowNodeRef><bpmn:flowNodeRef>park</bpmn:flowNodeRef><bpmn:flowNodeRef>drive</bpmn:flowNodeRef><bpmn:flowNodeRef>save</bpmn:flowNodeRef><bpmn:flowNodeRef>pts</bpmn:flowNodeRef></bpmn:lane>
+<bpmn:lane id="Lane_be" name="SiteScope backend"><bpmn:flowNodeRef>grant</bpmn:flowNodeRef><bpmn:flowNodeRef>valid</bpmn:flowNodeRef><bpmn:flowNodeRef>rej</bpmn:flowNodeRef><bpmn:flowNodeRef>creds</bpmn:flowNodeRef><bpmn:flowNodeRef>online</bpmn:flowNodeRef><bpmn:flowNodeRef>qstart</bpmn:flowNodeRef><bpmn:flowNodeRef>qsave</bpmn:flowNodeRef><bpmn:flowNodeRef>store</bpmn:flowNodeRef><bpmn:flowNodeRef>savepts</bpmn:flowNodeRef><bpmn:flowNodeRef>ready</bpmn:flowNodeRef></bpmn:lane>
+<bpmn:lane id="Lane_ag" name="Robot agent (Jetson Orin NX)"><bpmn:flowNodeRef>claim</bpmn:flowNodeRef><bpmn:flowNodeRef>cfg</bpmn:flowNodeRef><bpmn:flowNodeRef>hb</bpmn:flowNodeRef><bpmn:flowNodeRef>upmap</bpmn:flowNodeRef></bpmn:lane>
+<bpmn:lane id="Lane_ros" name="Robot control panel / ROS 2"><bpmn:flowNodeRef>slam</bpmn:flowNodeRef><bpmn:flowNodeRef>saved</bpmn:flowNodeRef></bpmn:lane>
+</bpmn:laneSet>
+<bpmn:startEvent id="s" name="New robot to add"><bpmn:outgoing>Flow_1</bpmn:outgoing></bpmn:startEvent>
+<bpmn:userTask id="acct" name="Create robot service account (Admin › Robot pairing)"><bpmn:incoming>Flow_1</bpmn:incoming><bpmn:outgoing>Flow_2</bpmn:outgoing></bpmn:userTask>
+<bpmn:userTask id="tok" name="Create pairing token and choose the default project"><bpmn:incoming>Flow_2</bpmn:incoming><bpmn:outgoing>Flow_3</bpmn:outgoing></bpmn:userTask>
+<bpmn:serviceTask id="grant" name="Give robot Editor role on the project; store one-time token with expiry"><bpmn:incoming>Flow_3</bpmn:incoming><bpmn:outgoing>Flow_4</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:manualTask id="claim" name="Claim the token once on the robot (robot_agent.py --claim-pairing-token)"><bpmn:incoming>Flow_4</bpmn:incoming><bpmn:outgoing>Flow_5</bpmn:outgoing></bpmn:manualTask>
+<bpmn:exclusiveGateway id="valid" name="Token valid and unused?"><bpmn:incoming>Flow_5</bpmn:incoming><bpmn:outgoing>Flow_6</bpmn:outgoing><bpmn:outgoing>Flow_7</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:endEvent id="rej" name="Claim rejected (unknown, revoked, expired or already claimed)"><bpmn:incoming>Flow_6</bpmn:incoming><bpmn:errorEventDefinition id="EED_rej"/></bpmn:endEvent>
+<bpmn:serviceTask id="creds" name="Mark token claimed; return robot credentials and server URL"><bpmn:incoming>Flow_7</bpmn:incoming><bpmn:outgoing>Flow_8</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:serviceTask id="cfg" name="Write robot_agent_config.json; start the sitescope-agent service"><bpmn:incoming>Flow_8</bpmn:incoming><bpmn:outgoing>Flow_9</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:serviceTask id="hb" name="Log in; heartbeat with camera / LiDAR availability"><bpmn:incoming>Flow_9</bpmn:incoming><bpmn:outgoing>Flow_10</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:serviceTask id="online" name="Show robot online on the Robots page"><bpmn:incoming>Flow_10</bpmn:incoming><bpmn:outgoing>Flow_11</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:exclusiveGateway id="how" name="How will the map be provided?"><bpmn:incoming>Flow_11</bpmn:incoming><bpmn:outgoing>Flow_12</bpmn:outgoing><bpmn:outgoing>Flow_13</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:userTask id="upl" name="Upload existing map files (.yaml + .pgm / .png)"><bpmn:incoming>Flow_12</bpmn:incoming><bpmn:outgoing>Flow_22</bpmn:outgoing></bpmn:userTask>
+<bpmn:userTask id="park" name="Park robot at its home pose; press Start mapping"><bpmn:incoming>Flow_13</bpmn:incoming><bpmn:outgoing>Flow_14</bpmn:outgoing></bpmn:userTask>
+<bpmn:serviceTask id="qstart" name="Queue map_start command"><bpmn:incoming>Flow_14</bpmn:incoming><bpmn:outgoing>Flow_15</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:serviceTask id="slam" name="Check sensors, stop navigation, start SLAM, stream live map"><bpmn:incoming>Flow_15</bpmn:incoming><bpmn:outgoing>Flow_16</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:manualTask id="drive" name="Drive the site with the handheld controller; bring robot back home"><bpmn:incoming>Flow_16</bpmn:incoming><bpmn:outgoing>Flow_17</bpmn:outgoing></bpmn:manualTask>
+<bpmn:userTask id="save" name="Name the map; press Save (enabled when back within 30 cm / 15°)"><bpmn:incoming>Flow_17</bpmn:incoming><bpmn:outgoing>Flow_18</bpmn:outgoing></bpmn:userTask>
+<bpmn:serviceTask id="qsave" name="Queue map_save command"><bpmn:incoming>Flow_18</bpmn:incoming><bpmn:outgoing>Flow_19</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:serviceTask id="saved" name="Save map and home pose; switch localization to the new map; stop SLAM"><bpmn:incoming>Flow_19</bpmn:incoming><bpmn:outgoing>Flow_20</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:serviceTask id="upmap" name="Upload the map to the project"><bpmn:incoming>Flow_20</bpmn:incoming><bpmn:outgoing>Flow_21</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:serviceTask id="store" name="Store new map version; retire capture points placed on the old map"><bpmn:incoming>Flow_21</bpmn:incoming><bpmn:incoming>Flow_22</bpmn:incoming><bpmn:outgoing>Flow_23</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:userTask id="pts" name="Place capture points: map position, facing direction, room"><bpmn:incoming>Flow_23</bpmn:incoming><bpmn:outgoing>Flow_24</bpmn:outgoing></bpmn:userTask>
+<bpmn:serviceTask id="savepts" name="Save capture points in the map frame (x, y, yaw)"><bpmn:incoming>Flow_24</bpmn:incoming><bpmn:outgoing>Flow_25</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:endEvent id="ready" name="Robot ready for missions"><bpmn:incoming>Flow_25</bpmn:incoming></bpmn:endEvent>
+<bpmn:sequenceFlow id="Flow_1" sourceRef="s" targetRef="acct"/>
+<bpmn:sequenceFlow id="Flow_2" sourceRef="acct" targetRef="tok"/>
+<bpmn:sequenceFlow id="Flow_3" sourceRef="tok" targetRef="grant"/>
+<bpmn:sequenceFlow id="Flow_4" sourceRef="grant" targetRef="claim"/>
+<bpmn:sequenceFlow id="Flow_5" sourceRef="claim" targetRef="valid"/>
+<bpmn:sequenceFlow id="Flow_6" name="No" sourceRef="valid" targetRef="rej"/>
+<bpmn:sequenceFlow id="Flow_7" name="Yes" sourceRef="valid" targetRef="creds"/>
+<bpmn:sequenceFlow id="Flow_8" sourceRef="creds" targetRef="cfg"/>
+<bpmn:sequenceFlow id="Flow_9" sourceRef="cfg" targetRef="hb"/>
+<bpmn:sequenceFlow id="Flow_10" sourceRef="hb" targetRef="online"/>
+<bpmn:sequenceFlow id="Flow_11" sourceRef="online" targetRef="how"/>
+<bpmn:sequenceFlow id="Flow_12" name="Upload" sourceRef="how" targetRef="upl"/>
+<bpmn:sequenceFlow id="Flow_13" name="Record" sourceRef="how" targetRef="park"/>
+<bpmn:sequenceFlow id="Flow_14" sourceRef="park" targetRef="qstart"/>
+<bpmn:sequenceFlow id="Flow_15" sourceRef="qstart" targetRef="slam"/>
+<bpmn:sequenceFlow id="Flow_16" sourceRef="slam" targetRef="drive"/>
+<bpmn:sequenceFlow id="Flow_17" sourceRef="drive" targetRef="save"/>
+<bpmn:sequenceFlow id="Flow_18" sourceRef="save" targetRef="qsave"/>
+<bpmn:sequenceFlow id="Flow_19" sourceRef="qsave" targetRef="saved"/>
+<bpmn:sequenceFlow id="Flow_20" sourceRef="saved" targetRef="upmap"/>
+<bpmn:sequenceFlow id="Flow_21" sourceRef="upmap" targetRef="store"/>
+<bpmn:sequenceFlow id="Flow_22" sourceRef="upl" targetRef="store"/>
+<bpmn:sequenceFlow id="Flow_23" sourceRef="store" targetRef="pts"/>
+<bpmn:sequenceFlow id="Flow_24" sourceRef="pts" targetRef="savepts"/>
+<bpmn:sequenceFlow id="Flow_25" sourceRef="savepts" targetRef="ready"/>
+<bpmn:textAnnotation id="Note_1"><bpmn:text>Robot accounts are non-admin service users. Missions can only upload to projects where the robot is Owner or Editor.</bpmn:text></bpmn:textAnnotation>
+<bpmn:association id="Assoc_1" sourceRef="tok" targetRef="Note_1"/>
+<bpmn:textAnnotation id="Note_2"><bpmn:text>“Switch back to the previous map” restores the old map, home pose and its capture points.</bpmn:text></bpmn:textAnnotation>
+<bpmn:association id="Assoc_2" sourceRef="store" targetRef="Note_2"/>
+<bpmn:textAnnotation id="Note_3"><bpmn:text>The agent claims commands by polling, the same way it claims missions.</bpmn:text></bpmn:textAnnotation>
+</bpmn:process>
+<bpmndi:BPMNDiagram id="Diagram_10"><bpmndi:BPMNPlane id="Plane_10" bpmnElement="Collab_10">
+<bpmndi:BPMNShape id="Pool_10_di" bpmnElement="Pool_10" isHorizontal="true"><dc:Bounds x="20" y="20" width="4118" height="1030"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Lane_own_di" bpmnElement="Lane_own" isHorizontal="true"><dc:Bounds x="50" y="20" width="4088" height="320"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Lane_be_di" bpmnElement="Lane_be" isHorizontal="true"><dc:Bounds x="50" y="340" width="4088" height="320"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Lane_ag_di" bpmnElement="Lane_ag" isHorizontal="true"><dc:Bounds x="50" y="660" width="4088" height="195"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Lane_ros_di" bpmnElement="Lane_ros" isHorizontal="true"><dc:Bounds x="50" y="855" width="4088" height="195"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="s_di" bpmnElement="s"><dc:Bounds x="192" y="100" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="150" y="142" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="acct_di" bpmnElement="acct"><dc:Bounds x="310" y="72" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="tok_di" bpmnElement="tok"><dc:Bounds x="485" y="72" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="grant_di" bpmnElement="grant"><dc:Bounds x="660" y="392" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="claim_di" bpmnElement="claim"><dc:Bounds x="835" y="712" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="valid_di" bpmnElement="valid" isMarkerVisible="true"><dc:Bounds x="1060" y="412" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="1025" y="378" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="rej_di" bpmnElement="rej"><dc:Bounds x="1067" y="544" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="1025" y="586" width="120" height="56"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="creds_di" bpmnElement="creds"><dc:Bounds x="1185" y="392" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="cfg_di" bpmnElement="cfg"><dc:Bounds x="1360" y="712" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="hb_di" bpmnElement="hb"><dc:Bounds x="1535" y="712" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="online_di" bpmnElement="online"><dc:Bounds x="1710" y="392" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="how_di" bpmnElement="how" isMarkerVisible="true"><dc:Bounds x="1935" y="92" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="1900" y="58" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="upl_di" bpmnElement="upl"><dc:Bounds x="2060" y="72" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="park_di" bpmnElement="park"><dc:Bounds x="2060" y="198" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="qstart_di" bpmnElement="qstart"><dc:Bounds x="2235" y="518" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="slam_di" bpmnElement="slam"><dc:Bounds x="2410" y="908" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="drive_di" bpmnElement="drive"><dc:Bounds x="2585" y="198" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="save_di" bpmnElement="save"><dc:Bounds x="2760" y="198" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="qsave_di" bpmnElement="qsave"><dc:Bounds x="2935" y="518" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="saved_di" bpmnElement="saved"><dc:Bounds x="3110" y="908" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="upmap_di" bpmnElement="upmap"><dc:Bounds x="3285" y="712" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="store_di" bpmnElement="store"><dc:Bounds x="3460" y="518" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="pts_di" bpmnElement="pts"><dc:Bounds x="3635" y="72" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="savepts_di" bpmnElement="savepts"><dc:Bounds x="3810" y="392" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="ready_di" bpmnElement="ready"><dc:Bounds x="4042" y="420" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="4000" y="462" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1"><di:waypoint x="228" y="118"/><di:waypoint x="310" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2"><di:waypoint x="460" y="118"/><di:waypoint x="485" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3"><di:waypoint x="635" y="118"/><di:waypoint x="648" y="118"/><di:waypoint x="648" y="438"/><di:waypoint x="660" y="438"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4"><di:waypoint x="810" y="438"/><di:waypoint x="822" y="438"/><di:waypoint x="822" y="758"/><di:waypoint x="835" y="758"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5"><di:waypoint x="985" y="758"/><di:waypoint x="1085" y="758"/><di:waypoint x="1085" y="462"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6"><di:waypoint x="1085" y="462"/><di:waypoint x="1085" y="544"/><bpmndi:BPMNLabel><dc:Bounds x="1091" y="496" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7"><di:waypoint x="1110" y="438"/><di:waypoint x="1185" y="438"/><bpmndi:BPMNLabel><dc:Bounds x="1154" y="418" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8"><di:waypoint x="1335" y="438"/><di:waypoint x="1348" y="438"/><di:waypoint x="1348" y="758"/><di:waypoint x="1360" y="758"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9"><di:waypoint x="1510" y="758"/><di:waypoint x="1535" y="758"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10"><di:waypoint x="1685" y="758"/><di:waypoint x="1698" y="758"/><di:waypoint x="1698" y="438"/><di:waypoint x="1710" y="438"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11"><di:waypoint x="1860" y="438"/><di:waypoint x="1898" y="438"/><di:waypoint x="1898" y="118"/><di:waypoint x="1935" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_12_di" bpmnElement="Flow_12"><di:waypoint x="1985" y="118"/><di:waypoint x="2060" y="118"/><bpmndi:BPMNLabel><dc:Bounds x="2028" y="98" width="38" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_13_di" bpmnElement="Flow_13"><di:waypoint x="1960" y="142"/><di:waypoint x="1960" y="242"/><di:waypoint x="2060" y="242"/><bpmndi:BPMNLabel><dc:Bounds x="1966" y="186" width="38" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_14_di" bpmnElement="Flow_14"><di:waypoint x="2210" y="242"/><di:waypoint x="2222" y="242"/><di:waypoint x="2222" y="562"/><di:waypoint x="2235" y="562"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_15_di" bpmnElement="Flow_15"><di:waypoint x="2385" y="562"/><di:waypoint x="2398" y="562"/><di:waypoint x="2398" y="952"/><di:waypoint x="2410" y="952"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_16_di" bpmnElement="Flow_16"><di:waypoint x="2560" y="952"/><di:waypoint x="2572" y="952"/><di:waypoint x="2572" y="242"/><di:waypoint x="2585" y="242"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_17_di" bpmnElement="Flow_17"><di:waypoint x="2735" y="242"/><di:waypoint x="2760" y="242"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_18_di" bpmnElement="Flow_18"><di:waypoint x="2910" y="242"/><di:waypoint x="2922" y="242"/><di:waypoint x="2922" y="562"/><di:waypoint x="2935" y="562"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_19_di" bpmnElement="Flow_19"><di:waypoint x="3085" y="562"/><di:waypoint x="3098" y="562"/><di:waypoint x="3098" y="952"/><di:waypoint x="3110" y="952"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_20_di" bpmnElement="Flow_20"><di:waypoint x="3260" y="952"/><di:waypoint x="3272" y="952"/><di:waypoint x="3272" y="758"/><di:waypoint x="3285" y="758"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_21_di" bpmnElement="Flow_21"><di:waypoint x="3435" y="758"/><di:waypoint x="3448" y="758"/><di:waypoint x="3448" y="562"/><di:waypoint x="3460" y="562"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_22_di" bpmnElement="Flow_22"><di:waypoint x="2210" y="118"/><di:waypoint x="3535" y="118"/><di:waypoint x="3535" y="518"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_23_di" bpmnElement="Flow_23"><di:waypoint x="3610" y="562"/><di:waypoint x="3622" y="562"/><di:waypoint x="3622" y="118"/><di:waypoint x="3635" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_24_di" bpmnElement="Flow_24"><di:waypoint x="3785" y="118"/><di:waypoint x="3798" y="118"/><di:waypoint x="3798" y="438"/><di:waypoint x="3810" y="438"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_25_di" bpmnElement="Flow_25"><di:waypoint x="3960" y="438"/><di:waypoint x="4042" y="438"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNShape id="Note_1_di" bpmnElement="Note_1"><dc:Bounds x="705" y="60" width="250" height="68"/></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="Assoc_1_di" bpmnElement="Assoc_1"><di:waypoint x="560" y="72"/><di:waypoint x="705" y="128"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNShape id="Note_2_di" bpmnElement="Note_2"><dc:Bounds x="3555" y="378" width="230" height="54"/></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="Assoc_2_di" bpmnElement="Assoc_2"><di:waypoint x="3535" y="518"/><di:waypoint x="3555" y="432"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNShape id="Note_3_di" bpmnElement="Note_3"><dc:Bounds x="2275" y="698" width="230" height="54"/></bpmndi:BPMNShape>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>

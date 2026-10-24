@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Defs_08" targetNamespace="https://sitescope.smart-crg.com/bpmn" exporter="SiteScope BPMN generator" exporterVersion="1.0">
+<bpmn:collaboration id="Collab_08"><bpmn:participant id="Pool_08" name="08 · Annotating an image" processRef="Process_08"/>
+</bpmn:collaboration>
+<bpmn:process id="Process_08" isExecutable="false">
+<bpmn:laneSet id="LaneSet_08">
+<bpmn:lane id="Lane_u" name="User in the image viewer"><bpmn:flowNodeRef>s0</bpmn:flowNodeRef><bpmn:flowNodeRef>role</bpmn:flowNodeRef><bpmn:flowNodeRef>ro</bpmn:flowNodeRef><bpmn:flowNodeRef>m</bpmn:flowNodeRef><bpmn:flowNodeRef>what</bpmn:flowNodeRef><bpmn:flowNodeRef>place</bpmn:flowNodeRef><bpmn:flowNodeRef>sel</bpmn:flowNodeRef><bpmn:flowNodeRef>own</bpmn:flowNodeRef><bpmn:flowNodeRef>no</bpmn:flowNodeRef><bpmn:flowNodeRef>ed</bpmn:flowNodeRef><bpmn:flowNodeRef>redraw</bpmn:flowNodeRef><bpmn:flowNodeRef>again</bpmn:flowNodeRef><bpmn:flowNodeRef>e</bpmn:flowNodeRef></bpmn:lane>
+<bpmn:lane id="Lane_s" name="SiteScope backend"><bpmn:flowNodeRef>api</bpmn:flowNodeRef></bpmn:lane>
+</bpmn:laneSet>
+<bpmn:startEvent id="s0" name="Open an image"><bpmn:outgoing>Flow_1</bpmn:outgoing></bpmn:startEvent>
+<bpmn:exclusiveGateway id="role" name="Owner, Editor or admin?"><bpmn:incoming>Flow_1</bpmn:incoming><bpmn:outgoing>Flow_2</bpmn:outgoing><bpmn:outgoing>Flow_3</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:endEvent id="ro" name="Read-only: pins visible, tools hidden"><bpmn:incoming>Flow_2</bpmn:incoming></bpmn:endEvent>
+<bpmn:exclusiveGateway id="m" name=""><bpmn:incoming>Flow_3</bpmn:incoming><bpmn:incoming>Flow_15</bpmn:incoming><bpmn:outgoing>Flow_4</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:exclusiveGateway id="what" name="Add or change?"><bpmn:incoming>Flow_4</bpmn:incoming><bpmn:outgoing>Flow_5</bpmn:outgoing><bpmn:outgoing>Flow_6</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:userTask id="place" name="Click to place a pin; fill note, flag (Safety / Quality / Delayed), optional link and photo"><bpmn:incoming>Flow_5</bpmn:incoming><bpmn:outgoing>Flow_7</bpmn:outgoing></bpmn:userTask>
+<bpmn:userTask id="sel" name="Select an existing pin"><bpmn:incoming>Flow_6</bpmn:incoming><bpmn:outgoing>Flow_8</bpmn:outgoing></bpmn:userTask>
+<bpmn:exclusiveGateway id="own" name="Created by you (or you are admin)?"><bpmn:incoming>Flow_8</bpmn:incoming><bpmn:outgoing>Flow_9</bpmn:outgoing><bpmn:outgoing>Flow_10</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:endEvent id="no" name="Edit / delete hidden in the UI"><bpmn:incoming>Flow_9</bpmn:incoming></bpmn:endEvent>
+<bpmn:userTask id="ed" name="Edit the pin or delete it"><bpmn:incoming>Flow_10</bpmn:incoming><bpmn:outgoing>Flow_11</bpmn:outgoing></bpmn:userTask>
+<bpmn:serviceTask id="api" name="Save, update or delete the annotation; store / remove the attachment in MinIO"><bpmn:incoming>Flow_7</bpmn:incoming><bpmn:incoming>Flow_11</bpmn:incoming><bpmn:outgoing>Flow_12</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:serviceTask id="redraw" name="Redraw the annotation layer"><bpmn:incoming>Flow_12</bpmn:incoming><bpmn:outgoing>Flow_13</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:exclusiveGateway id="again" name="Another?"><bpmn:incoming>Flow_13</bpmn:incoming><bpmn:outgoing>Flow_14</bpmn:outgoing><bpmn:outgoing>Flow_15</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:endEvent id="e" name="Done"><bpmn:incoming>Flow_14</bpmn:incoming></bpmn:endEvent>
+<bpmn:sequenceFlow id="Flow_1" sourceRef="s0" targetRef="role"/>
+<bpmn:sequenceFlow id="Flow_2" name="No" sourceRef="role" targetRef="ro"/>
+<bpmn:sequenceFlow id="Flow_3" name="Yes" sourceRef="role" targetRef="m"/>
+<bpmn:sequenceFlow id="Flow_4" sourceRef="m" targetRef="what"/>
+<bpmn:sequenceFlow id="Flow_5" name="Add" sourceRef="what" targetRef="place"/>
+<bpmn:sequenceFlow id="Flow_6" name="Change" sourceRef="what" targetRef="sel"/>
+<bpmn:sequenceFlow id="Flow_7" sourceRef="place" targetRef="api"/>
+<bpmn:sequenceFlow id="Flow_8" sourceRef="sel" targetRef="own"/>
+<bpmn:sequenceFlow id="Flow_9" name="No" sourceRef="own" targetRef="no"/>
+<bpmn:sequenceFlow id="Flow_10" name="Yes" sourceRef="own" targetRef="ed"/>
+<bpmn:sequenceFlow id="Flow_11" sourceRef="ed" targetRef="api"/>
+<bpmn:sequenceFlow id="Flow_12" sourceRef="api" targetRef="redraw"/>
+<bpmn:sequenceFlow id="Flow_13" sourceRef="redraw" targetRef="again"/>
+<bpmn:sequenceFlow id="Flow_14" name="No" sourceRef="again" targetRef="e"/>
+<bpmn:sequenceFlow id="Flow_15" name="Yes" sourceRef="again" targetRef="m"/>
+<bpmn:textAnnotation id="Note_1"><bpmn:text>Gap found in the code: the API does not check roles or the pin's creator for create / edit / delete (any logged-in user can call them), and listing a file's pins needs no login. Only the UI enforces these rules.</bpmn:text></bpmn:textAnnotation>
+<bpmn:association id="Assoc_1" sourceRef="api" targetRef="Note_1"/>
+</bpmn:process>
+<bpmndi:BPMNDiagram id="Diagram_08"><bpmndi:BPMNPlane id="Plane_08" bpmnElement="Collab_08">
+<bpmndi:BPMNShape id="Pool_08_di" bpmnElement="Pool_08" isHorizontal="true"><dc:Bounds x="20" y="20" width="2018" height="765"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Lane_u_di" bpmnElement="Lane_u" isHorizontal="true"><dc:Bounds x="50" y="20" width="1988" height="570"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Lane_s_di" bpmnElement="Lane_s" isHorizontal="true"><dc:Bounds x="50" y="590" width="1988" height="195"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="s0_di" bpmnElement="s0"><dc:Bounds x="192" y="224" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="150" y="266" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="role_di" bpmnElement="role" isMarkerVisible="true"><dc:Bounds x="360" y="218" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="325" y="184" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="ro_di" bpmnElement="ro"><dc:Bounds x="367" y="474" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="325" y="516" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="m_di" bpmnElement="m" isMarkerVisible="true"><dc:Bounds x="535" y="218" width="50" height="50"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="what_di" bpmnElement="what" isMarkerVisible="true"><dc:Bounds x="710" y="218" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="675" y="274" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="place_di" bpmnElement="place"><dc:Bounds x="835" y="68" width="150" height="100"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="sel_di" bpmnElement="sel"><dc:Bounds x="835" y="322" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="own_di" bpmnElement="own" isMarkerVisible="true"><dc:Bounds x="1060" y="342" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="1025" y="308" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="no_di" bpmnElement="no"><dc:Bounds x="1067" y="474" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="1111" y="466" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="ed_di" bpmnElement="ed"><dc:Bounds x="1185" y="322" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="api_di" bpmnElement="api"><dc:Bounds x="1360" y="638" width="150" height="100"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="redraw_di" bpmnElement="redraw"><dc:Bounds x="1535" y="198" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="again_di" bpmnElement="again" isMarkerVisible="true"><dc:Bounds x="1760" y="218" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="1725" y="274" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="e_di" bpmnElement="e"><dc:Bounds x="1942" y="224" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="1900" y="266" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1"><di:waypoint x="228" y="242"/><di:waypoint x="360" y="242"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2"><di:waypoint x="385" y="268"/><di:waypoint x="385" y="474"/><bpmndi:BPMNLabel><dc:Bounds x="391" y="364" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3"><di:waypoint x="410" y="242"/><di:waypoint x="535" y="242"/><bpmndi:BPMNLabel><dc:Bounds x="478" y="222" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4"><di:waypoint x="585" y="242"/><di:waypoint x="710" y="242"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5"><di:waypoint x="735" y="218"/><di:waypoint x="735" y="118"/><di:waypoint x="835" y="118"/><bpmndi:BPMNLabel><dc:Bounds x="741" y="160" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6"><di:waypoint x="735" y="268"/><di:waypoint x="735" y="368"/><di:waypoint x="835" y="368"/><bpmndi:BPMNLabel><dc:Bounds x="741" y="310" width="38" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7"><di:waypoint x="985" y="118"/><di:waypoint x="1172" y="118"/><di:waypoint x="1172" y="688"/><di:waypoint x="1360" y="688"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8"><di:waypoint x="985" y="368"/><di:waypoint x="1060" y="368"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9"><di:waypoint x="1085" y="392"/><di:waypoint x="1085" y="474"/><bpmndi:BPMNLabel><dc:Bounds x="1091" y="426" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10"><di:waypoint x="1110" y="368"/><di:waypoint x="1185" y="368"/><bpmndi:BPMNLabel><dc:Bounds x="1154" y="348" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11"><di:waypoint x="1335" y="368"/><di:waypoint x="1348" y="368"/><di:waypoint x="1348" y="688"/><di:waypoint x="1360" y="688"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_12_di" bpmnElement="Flow_12"><di:waypoint x="1510" y="688"/><di:waypoint x="1522" y="688"/><di:waypoint x="1522" y="242"/><di:waypoint x="1535" y="242"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_13_di" bpmnElement="Flow_13"><di:waypoint x="1685" y="242"/><di:waypoint x="1760" y="242"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_14_di" bpmnElement="Flow_14"><di:waypoint x="1810" y="242"/><di:waypoint x="1942" y="242"/><bpmndi:BPMNLabel><dc:Bounds x="1882" y="222" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_15_di" bpmnElement="Flow_15"><di:waypoint x="1785" y="218"/><di:waypoint x="1785" y="190"/><di:waypoint x="560" y="190"/><di:waypoint x="560" y="218"/><bpmndi:BPMNLabel><dc:Bounds x="1791" y="196" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNShape id="Note_1_di" bpmnElement="Note_1"><dc:Bounds x="1610" y="620" width="330" height="82"/></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="Assoc_1_di" bpmnElement="Assoc_1"><di:waypoint x="1435" y="638"/><di:waypoint x="1610" y="702"/></bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>

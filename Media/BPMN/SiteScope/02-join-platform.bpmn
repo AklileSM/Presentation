@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Defs_02" targetNamespace="https://sitescope.smart-crg.com/bpmn" exporter="SiteScope BPMN generator" exporterVersion="1.0">
+<bpmn:collaboration id="Collab_02"><bpmn:participant id="Pool_02" name="02 · Joining the platform and getting access" processRef="Process_02"/>
+</bpmn:collaboration>
+<bpmn:process id="Process_02" isExecutable="false">
+<bpmn:laneSet id="LaneSet_02">
+<bpmn:lane id="Lane_u" name="Visitor / user and SiteScope"><bpmn:flowNodeRef>s0</bpmn:flowNodeRef><bpmn:flowNodeRef>w</bpmn:flowNodeRef><bpmn:flowNodeRef>rf</bpmn:flowNodeRef><bpmn:flowNodeRef>fx</bpmn:flowNodeRef><bpmn:flowNodeRef>dup</bpmn:flowNodeRef><bpmn:flowNodeRef>mk</bpmn:flowNodeRef><bpmn:flowNodeRef>reg</bpmn:flowNodeRef><bpmn:flowNodeRef>lf</bpmn:flowNodeRef><bpmn:flowNodeRef>cred</bpmn:flowNodeRef><bpmn:flowNodeRef>bad</bpmn:flowNodeRef><bpmn:flowNodeRef>act</bpmn:flowNodeRef><bpmn:flowNodeRef>dis</bpmn:flowNodeRef><bpmn:flowNodeRef>in</bpmn:flowNodeRef><bpmn:flowNodeRef>rq</bpmn:flowNodeRef><bpmn:flowNodeRef>gen</bpmn:flowNodeRef><bpmn:flowNodeRef>click</bpmn:flowNodeRef><bpmn:flowNodeRef>valid</bpmn:flowNodeRef><bpmn:flowNodeRef>exp</bpmn:flowNodeRef><bpmn:flowNodeRef>np</bpmn:flowNodeRef><bpmn:flowNodeRef>done</bpmn:flowNodeRef></bpmn:lane>
+</bpmn:laneSet>
+<bpmn:startEvent id="s0" name="Open the app"><bpmn:outgoing>Flow_1</bpmn:outgoing></bpmn:startEvent>
+<bpmn:exclusiveGateway id="w" name="What do you want to do?"><bpmn:incoming>Flow_1</bpmn:incoming><bpmn:outgoing>Flow_2</bpmn:outgoing><bpmn:outgoing>Flow_7</bpmn:outgoing><bpmn:outgoing>Flow_13</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:userTask id="rf" name="Fill in username, email and password"><bpmn:incoming>Flow_2</bpmn:incoming><bpmn:outgoing>Flow_3</bpmn:outgoing></bpmn:userTask>
+<bpmn:exclusiveGateway id="fx" name="Username or email already registered?"><bpmn:incoming>Flow_3</bpmn:incoming><bpmn:outgoing>Flow_4</bpmn:outgoing><bpmn:outgoing>Flow_5</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:endEvent id="dup" name="Registration refused"><bpmn:incoming>Flow_4</bpmn:incoming><bpmn:errorEventDefinition id="EED_dup"/></bpmn:endEvent>
+<bpmn:serviceTask id="mk" name="Create account (the very first account becomes Administrator); email a 7-day verification link"><bpmn:incoming>Flow_5</bpmn:incoming><bpmn:outgoing>Flow_6</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:endEvent id="reg" name="Account created and logged in"><bpmn:incoming>Flow_6</bpmn:incoming></bpmn:endEvent>
+<bpmn:userTask id="lf" name="Enter username and password"><bpmn:incoming>Flow_7</bpmn:incoming><bpmn:outgoing>Flow_8</bpmn:outgoing></bpmn:userTask>
+<bpmn:exclusiveGateway id="cred" name="Correct credentials?"><bpmn:incoming>Flow_8</bpmn:incoming><bpmn:outgoing>Flow_9</bpmn:outgoing><bpmn:outgoing>Flow_10</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:endEvent id="bad" name="Incorrect username or password"><bpmn:incoming>Flow_9</bpmn:incoming><bpmn:errorEventDefinition id="EED_bad"/></bpmn:endEvent>
+<bpmn:exclusiveGateway id="act" name="Account active?"><bpmn:incoming>Flow_10</bpmn:incoming><bpmn:outgoing>Flow_11</bpmn:outgoing><bpmn:outgoing>Flow_12</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:endEvent id="dis" name="Account disabled by an administrator"><bpmn:incoming>Flow_11</bpmn:incoming><bpmn:errorEventDefinition id="EED_dis"/></bpmn:endEvent>
+<bpmn:endEvent id="in" name="Logged in (7-day token)"><bpmn:incoming>Flow_12</bpmn:incoming></bpmn:endEvent>
+<bpmn:userTask id="rq" name="Enter the account's email address"><bpmn:incoming>Flow_13</bpmn:incoming><bpmn:outgoing>Flow_14</bpmn:outgoing></bpmn:userTask>
+<bpmn:serviceTask id="gen" name="Email a 1-hour reset link only to active, verified accounts; same reply either way"><bpmn:incoming>Flow_14</bpmn:incoming><bpmn:outgoing>Flow_15</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:userTask id="click" name="Open the reset link"><bpmn:incoming>Flow_15</bpmn:incoming><bpmn:outgoing>Flow_16</bpmn:outgoing></bpmn:userTask>
+<bpmn:exclusiveGateway id="valid" name="Link still valid?"><bpmn:incoming>Flow_16</bpmn:incoming><bpmn:outgoing>Flow_17</bpmn:outgoing><bpmn:outgoing>Flow_18</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:endEvent id="exp" name="Link expired: request a new one"><bpmn:incoming>Flow_17</bpmn:incoming><bpmn:errorEventDefinition id="EED_exp"/></bpmn:endEvent>
+<bpmn:userTask id="np" name="Enter and confirm the new password"><bpmn:incoming>Flow_18</bpmn:incoming><bpmn:outgoing>Flow_19</bpmn:outgoing></bpmn:userTask>
+<bpmn:endEvent id="done" name="Password updated"><bpmn:incoming>Flow_19</bpmn:incoming></bpmn:endEvent>
+<bpmn:sequenceFlow id="Flow_1" sourceRef="s0" targetRef="w"/>
+<bpmn:sequenceFlow id="Flow_2" name="Register" sourceRef="w" targetRef="rf"/>
+<bpmn:sequenceFlow id="Flow_3" sourceRef="rf" targetRef="fx"/>
+<bpmn:sequenceFlow id="Flow_4" name="Yes" sourceRef="fx" targetRef="dup"/>
+<bpmn:sequenceFlow id="Flow_5" name="No" sourceRef="fx" targetRef="mk"/>
+<bpmn:sequenceFlow id="Flow_6" sourceRef="mk" targetRef="reg"/>
+<bpmn:sequenceFlow id="Flow_7" name="Log in" sourceRef="w" targetRef="lf"/>
+<bpmn:sequenceFlow id="Flow_8" sourceRef="lf" targetRef="cred"/>
+<bpmn:sequenceFlow id="Flow_9" name="No" sourceRef="cred" targetRef="bad"/>
+<bpmn:sequenceFlow id="Flow_10" name="Yes" sourceRef="cred" targetRef="act"/>
+<bpmn:sequenceFlow id="Flow_11" name="No" sourceRef="act" targetRef="dis"/>
+<bpmn:sequenceFlow id="Flow_12" name="Yes" sourceRef="act" targetRef="in"/>
+<bpmn:sequenceFlow id="Flow_13" name="Reset password" sourceRef="w" targetRef="rq"/>
+<bpmn:sequenceFlow id="Flow_14" sourceRef="rq" targetRef="gen"/>
+<bpmn:sequenceFlow id="Flow_15" sourceRef="gen" targetRef="click"/>
+<bpmn:sequenceFlow id="Flow_16" sourceRef="click" targetRef="valid"/>
+<bpmn:sequenceFlow id="Flow_17" name="No" sourceRef="valid" targetRef="exp"/>
+<bpmn:sequenceFlow id="Flow_18" name="Yes" sourceRef="valid" targetRef="np"/>
+<bpmn:sequenceFlow id="Flow_19" sourceRef="np" targetRef="done"/>
+<bpmn:textAnnotation id="Note_1"><bpmn:text>Verifying the email (link from registration, or Resend on the profile page) is required before a password can be reset, so nobody can take over an account registered against someone else's address.</bpmn:text></bpmn:textAnnotation>
+<bpmn:textAnnotation id="Note_2"><bpmn:text>Robot accounts are not registered here: an administrator creates them pre-verified (diagram 10).</bpmn:text></bpmn:textAnnotation>
+</bpmn:process>
+<bpmndi:BPMNDiagram id="Diagram_02"><bpmndi:BPMNPlane id="Plane_02" bpmnElement="Collab_02">
+<bpmndi:BPMNShape id="Pool_02_di" bpmnElement="Pool_02" isHorizontal="true"><dc:Bounds x="20" y="20" width="1560" height="820"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Lane_u_di" bpmnElement="Lane_u" isHorizontal="true"><dc:Bounds x="50" y="20" width="1530" height="820"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="s0_di" bpmnElement="s0"><dc:Bounds x="192" y="350" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="150" y="392" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="w_di" bpmnElement="w" isMarkerVisible="true"><dc:Bounds x="360" y="342" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="325" y="398" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="rf_di" bpmnElement="rf"><dc:Bounds x="485" y="72" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="fx_di" bpmnElement="fx" isMarkerVisible="true"><dc:Bounds x="710" y="92" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="675" y="58" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="dup_di" bpmnElement="dup"><dc:Bounds x="717" y="224" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="761" y="216" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="mk_di" bpmnElement="mk"><dc:Bounds x="825" y="68" width="170" height="100"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="reg_di" bpmnElement="reg"><dc:Bounds x="1067" y="100" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="1025" y="142" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="lf_di" bpmnElement="lf"><dc:Bounds x="485" y="322" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="cred_di" bpmnElement="cred" isMarkerVisible="true"><dc:Bounds x="710" y="342" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="675" y="308" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="bad_di" bpmnElement="bad"><dc:Bounds x="717" y="474" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="761" y="466" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="act_di" bpmnElement="act" isMarkerVisible="true"><dc:Bounds x="885" y="342" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="850" y="322" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="dis_di" bpmnElement="dis"><dc:Bounds x="892" y="474" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="936" y="466" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="in_di" bpmnElement="in"><dc:Bounds x="1067" y="350" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="1025" y="392" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="rq_di" bpmnElement="rq"><dc:Bounds x="485" y="572" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="gen_di" bpmnElement="gen"><dc:Bounds x="660" y="568" width="150" height="100"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="click_di" bpmnElement="click"><dc:Bounds x="835" y="572" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="valid_di" bpmnElement="valid" isMarkerVisible="true"><dc:Bounds x="1060" y="592" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="1025" y="572" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="exp_di" bpmnElement="exp"><dc:Bounds x="1067" y="724" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="1111" y="716" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="np_di" bpmnElement="np"><dc:Bounds x="1185" y="572" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="done_di" bpmnElement="done"><dc:Bounds x="1417" y="600" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="1375" y="642" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1"><di:waypoint x="228" y="368"/><di:waypoint x="360" y="368"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2"><di:waypoint x="385" y="342"/><di:waypoint x="385" y="118"/><di:waypoint x="485" y="118"/><bpmndi:BPMNLabel><dc:Bounds x="391" y="223" width="51" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3"><di:waypoint x="635" y="118"/><di:waypoint x="710" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4"><di:waypoint x="735" y="142"/><di:waypoint x="735" y="224"/><bpmndi:BPMNLabel><dc:Bounds x="741" y="176" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5"><di:waypoint x="760" y="118"/><di:waypoint x="825" y="118"/><bpmndi:BPMNLabel><dc:Bounds x="798" y="98" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6"><di:waypoint x="995" y="118"/><di:waypoint x="1067" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7"><di:waypoint x="410" y="368"/><di:waypoint x="485" y="368"/><bpmndi:BPMNLabel><dc:Bounds x="454" y="348" width="38" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8"><di:waypoint x="635" y="368"/><di:waypoint x="710" y="368"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9"><di:waypoint x="735" y="392"/><di:waypoint x="735" y="474"/><bpmndi:BPMNLabel><dc:Bounds x="741" y="426" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10"><di:waypoint x="760" y="368"/><di:waypoint x="885" y="368"/><bpmndi:BPMNLabel><dc:Bounds x="828" y="348" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11"><di:waypoint x="910" y="392"/><di:waypoint x="910" y="474"/><bpmndi:BPMNLabel><dc:Bounds x="916" y="426" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_12_di" bpmnElement="Flow_12"><di:waypoint x="935" y="368"/><di:waypoint x="1067" y="368"/><bpmndi:BPMNLabel><dc:Bounds x="1007" y="348" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_13_di" bpmnElement="Flow_13"><di:waypoint x="385" y="392"/><di:waypoint x="385" y="618"/><di:waypoint x="485" y="618"/><bpmndi:BPMNLabel><dc:Bounds x="391" y="498" width="90" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_14_di" bpmnElement="Flow_14"><di:waypoint x="635" y="618"/><di:waypoint x="660" y="618"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_15_di" bpmnElement="Flow_15"><di:waypoint x="810" y="618"/><di:waypoint x="835" y="618"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_16_di" bpmnElement="Flow_16"><di:waypoint x="985" y="618"/><di:waypoint x="1060" y="618"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_17_di" bpmnElement="Flow_17"><di:waypoint x="1085" y="642"/><di:waypoint x="1085" y="724"/><bpmndi:BPMNLabel><dc:Bounds x="1091" y="676" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_18_di" bpmnElement="Flow_18"><di:waypoint x="1110" y="618"/><di:waypoint x="1185" y="618"/><bpmndi:BPMNLabel><dc:Bounds x="1154" y="598" width="30" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_19_di" bpmnElement="Flow_19"><di:waypoint x="1335" y="618"/><di:waypoint x="1417" y="618"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNShape id="Note_1_di" bpmnElement="Note_1"><dc:Bounds x="1190" y="60" width="330" height="68"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Note_2_di" bpmnElement="Note_2"><dc:Bounds x="1190" y="315" width="260" height="54"/></bpmndi:BPMNShape>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>
