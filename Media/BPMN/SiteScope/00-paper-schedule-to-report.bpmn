@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Defs_P2" targetNamespace="https://sitescope.smart-crg.com/bpmn" exporter="SiteScope BPMN generator" exporterVersion="1.0">
+<bpmn:collaboration id="Collab_P2"><bpmn:participant id="Pool_P2" name="SiteScope schedule-to-report workflow (paper Fig. 2)" processRef="Process_P2"/>
+</bpmn:collaboration>
+<bpmn:process id="Process_P2" isExecutable="false">
+<bpmn:laneSet id="LaneSet_P2">
+<bpmn:lane id="Lane_man" name="Manual workflow"><bpmn:flowNodeRef>ms</bpmn:flowNodeRef><bpmn:flowNodeRef>sm1</bpmn:flowNodeRef><bpmn:flowNodeRef>m1</bpmn:flowNodeRef><bpmn:flowNodeRef>m2</bpmn:flowNodeRef></bpmn:lane>
+<bpmn:lane id="Lane_plat" name="User / SiteScope platform"><bpmn:flowNodeRef>ps</bpmn:flowNodeRef><bpmn:flowNodeRef>sr</bpmn:flowNodeRef><bpmn:flowNodeRef>r1</bpmn:flowNodeRef><bpmn:flowNodeRef>occ</bpmn:flowNodeRef><bpmn:flowNodeRef>mk</bpmn:flowNodeRef><bpmn:flowNodeRef>ev</bpmn:flowNodeRef><bpmn:flowNodeRef>ing</bpmn:flowNodeRef><bpmn:flowNodeRef>rev</bpmn:flowNodeRef><bpmn:flowNodeRef>gen</bpmn:flowNodeRef><bpmn:flowNodeRef>pub</bpmn:flowNodeRef><bpmn:flowNodeRef>end</bpmn:flowNodeRef></bpmn:lane>
+<bpmn:lane id="Lane_rob" name="Robot system"><bpmn:flowNodeRef>r2</bpmn:flowNodeRef></bpmn:lane>
+</bpmn:laneSet>
+<bpmn:startEvent id="ms" name="Start"><bpmn:outgoing>Flow_1</bpmn:outgoing></bpmn:startEvent>
+<bpmn:manualTask id="sm1" name="S-M1: Define route"><bpmn:incoming>Flow_1</bpmn:incoming><bpmn:outgoing>Flow_2</bpmn:outgoing></bpmn:manualTask>
+<bpmn:manualTask id="m1" name="M1: Prepare camera"><bpmn:incoming>Flow_2</bpmn:incoming><bpmn:outgoing>Flow_3</bpmn:outgoing></bpmn:manualTask>
+<bpmn:manualTask id="m2" name="M2: Capture and upload evidence"><bpmn:incoming>Flow_3</bpmn:incoming><bpmn:outgoing>Flow_4</bpmn:outgoing></bpmn:manualTask>
+<bpmn:startEvent id="ps" name="Start"><bpmn:outgoing>Flow_5</bpmn:outgoing></bpmn:startEvent>
+<bpmn:userTask id="sr" name="S-R1–S-R5: Configure robotic workflow"><bpmn:incoming>Flow_5</bpmn:incoming><bpmn:outgoing>Flow_6</bpmn:outgoing></bpmn:userTask>
+<bpmn:manualTask id="r1" name="R1: Start robot"><bpmn:incoming>Flow_6</bpmn:incoming><bpmn:outgoing>Flow_7</bpmn:outgoing></bpmn:manualTask>
+<bpmn:intermediateCatchEvent id="occ" name="Scheduled occurrence"><bpmn:incoming>Flow_7</bpmn:incoming><bpmn:outgoing>Flow_8</bpmn:outgoing><bpmn:timerEventDefinition id="TED_occ"/></bpmn:intermediateCatchEvent>
+<bpmn:serviceTask id="mk" name="Create mission"><bpmn:incoming>Flow_8</bpmn:incoming><bpmn:outgoing>Flow_9</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:serviceTask id="r2" name="R2: Claim mission, navigate, capture, upload, return to H"><bpmn:incoming>Flow_9</bpmn:incoming><bpmn:outgoing>Flow_10</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:exclusiveGateway id="ev" name="Evidence available"><bpmn:incoming>Flow_4</bpmn:incoming><bpmn:incoming>Flow_10</bpmn:incoming><bpmn:outgoing>Flow_11</bpmn:outgoing></bpmn:exclusiveGateway>
+<bpmn:serviceTask id="ing" name="Ingest and store with provenance"><bpmn:incoming>Flow_11</bpmn:incoming><bpmn:outgoing>Flow_12</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:userTask id="rev" name="Review and annotate"><bpmn:incoming>Flow_12</bpmn:incoming><bpmn:outgoing>Flow_13</bpmn:outgoing></bpmn:userTask>
+<bpmn:serviceTask id="gen" name="Generate PDF"><bpmn:incoming>Flow_13</bpmn:incoming><bpmn:outgoing>Flow_14</bpmn:outgoing></bpmn:serviceTask>
+<bpmn:userTask id="pub" name="Verify and publish"><bpmn:incoming>Flow_14</bpmn:incoming><bpmn:outgoing>Flow_15</bpmn:outgoing></bpmn:userTask>
+<bpmn:endEvent id="end" name="End"><bpmn:incoming>Flow_15</bpmn:incoming></bpmn:endEvent>
+<bpmn:sequenceFlow id="Flow_1" sourceRef="ms" targetRef="sm1"/>
+<bpmn:sequenceFlow id="Flow_2" sourceRef="sm1" targetRef="m1"/>
+<bpmn:sequenceFlow id="Flow_3" sourceRef="m1" targetRef="m2"/>
+<bpmn:sequenceFlow id="Flow_4" sourceRef="m2" targetRef="ev"/>
+<bpmn:sequenceFlow id="Flow_5" sourceRef="ps" targetRef="sr"/>
+<bpmn:sequenceFlow id="Flow_6" sourceRef="sr" targetRef="r1"/>
+<bpmn:sequenceFlow id="Flow_7" sourceRef="r1" targetRef="occ"/>
+<bpmn:sequenceFlow id="Flow_8" sourceRef="occ" targetRef="mk"/>
+<bpmn:sequenceFlow id="Flow_9" sourceRef="mk" targetRef="r2"/>
+<bpmn:sequenceFlow id="Flow_10" sourceRef="r2" targetRef="ev"/>
+<bpmn:sequenceFlow id="Flow_11" sourceRef="ev" targetRef="ing"/>
+<bpmn:sequenceFlow id="Flow_12" sourceRef="ing" targetRef="rev"/>
+<bpmn:sequenceFlow id="Flow_13" sourceRef="rev" targetRef="gen"/>
+<bpmn:sequenceFlow id="Flow_14" sourceRef="gen" targetRef="pub"/>
+<bpmn:sequenceFlow id="Flow_15" sourceRef="pub" targetRef="end"/>
+<bpmn:group id="Group_1" categoryValueRef="CatVal_1"/>
+<bpmn:group id="Group_2" categoryValueRef="CatVal_2"/>
+<bpmn:group id="Group_3" categoryValueRef="CatVal_3"/>
+<bpmn:group id="Group_4" categoryValueRef="CatVal_4"/>
+</bpmn:process>
+<bpmn:category id="Cat_1"><bpmn:categoryValue id="CatVal_1" value="ONE-TIME SETUP"/></bpmn:category>
+<bpmn:category id="Cat_2"><bpmn:categoryValue id="CatVal_2" value="RECURRING EXECUTION"/></bpmn:category>
+<bpmn:category id="Cat_3"><bpmn:categoryValue id="CatVal_3" value="COMMON SITESCOPE WORKFLOW"/></bpmn:category>
+<bpmn:category id="Cat_4"><bpmn:categoryValue id="CatVal_4" value="C1: Review and report publication"/></bpmn:category>
+<bpmndi:BPMNDiagram id="Diagram_P2"><bpmndi:BPMNPlane id="Plane_P2" bpmnElement="Collab_P2">
+<bpmndi:BPMNShape id="Pool_P2_di" bpmnElement="Pool_P2" isHorizontal="true"><dc:Bounds x="20" y="20" width="2009" height="585"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Lane_man_di" bpmnElement="Lane_man" isHorizontal="true"><dc:Bounds x="50" y="20" width="1979" height="195"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Lane_plat_di" bpmnElement="Lane_plat" isHorizontal="true"><dc:Bounds x="50" y="215" width="1979" height="195"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Lane_rob_di" bpmnElement="Lane_rob" isHorizontal="true"><dc:Bounds x="50" y="410" width="1979" height="195"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="ms_di" bpmnElement="ms"><dc:Bounds x="192" y="100" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="150" y="142" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="sm1_di" bpmnElement="sm1"><dc:Bounds x="310" y="72" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="m1_di" bpmnElement="m1"><dc:Bounds x="538" y="72" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="m2_di" bpmnElement="m2"><dc:Bounds x="712" y="72" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="ps_di" bpmnElement="ps"><dc:Bounds x="192" y="294" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="150" y="336" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="sr_di" bpmnElement="sr"><dc:Bounds x="310" y="268" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="r1_di" bpmnElement="r1"><dc:Bounds x="538" y="268" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="occ_di" bpmnElement="occ"><dc:Bounds x="726" y="294" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="684" y="336" width="120" height="28"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="mk_di" bpmnElement="mk"><dc:Bounds x="800" y="268" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="r2_di" bpmnElement="r2"><dc:Bounds x="800" y="462" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="ev_di" bpmnElement="ev" isMarkerVisible="true"><dc:Bounds x="1104" y="288" width="50" height="50"/><bpmndi:BPMNLabel><dc:Bounds x="976" y="294" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="ing_di" bpmnElement="ing"><dc:Bounds x="1202" y="268" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="rev_di" bpmnElement="rev"><dc:Bounds x="1378" y="268" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="gen_di" bpmnElement="gen"><dc:Bounds x="1535" y="268" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="pub_di" bpmnElement="pub"><dc:Bounds x="1692" y="268" width="150" height="90"/></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="end_di" bpmnElement="end"><dc:Bounds x="1907" y="294" width="36" height="36"/><bpmndi:BPMNLabel><dc:Bounds x="1865" y="336" width="120" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1"><di:waypoint x="228" y="118"/><di:waypoint x="310" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_2_di" bpmnElement="Flow_2"><di:waypoint x="460" y="118"/><di:waypoint x="538" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3"><di:waypoint x="688" y="118"/><di:waypoint x="712" y="118"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_4_di" bpmnElement="Flow_4"><di:waypoint x="862" y="118"/><di:waypoint x="1129" y="118"/><di:waypoint x="1129" y="288"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_5_di" bpmnElement="Flow_5"><di:waypoint x="228" y="312"/><di:waypoint x="310" y="312"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_6_di" bpmnElement="Flow_6"><di:waypoint x="460" y="312"/><di:waypoint x="538" y="312"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_7_di" bpmnElement="Flow_7"><di:waypoint x="688" y="312"/><di:waypoint x="726" y="312"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8"><di:waypoint x="762" y="312"/><di:waypoint x="800" y="312"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9"><di:waypoint x="875" y="358"/><di:waypoint x="875" y="462"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10"><di:waypoint x="950" y="508"/><di:waypoint x="1129" y="508"/><di:waypoint x="1129" y="338"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11"><di:waypoint x="1154" y="312"/><di:waypoint x="1202" y="312"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_12_di" bpmnElement="Flow_12"><di:waypoint x="1352" y="312"/><di:waypoint x="1378" y="312"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_13_di" bpmnElement="Flow_13"><di:waypoint x="1528" y="312"/><di:waypoint x="1535" y="312"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_14_di" bpmnElement="Flow_14"><di:waypoint x="1685" y="312"/><di:waypoint x="1692" y="312"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNEdge id="Flow_15_di" bpmnElement="Flow_15"><di:waypoint x="1842" y="312"/><di:waypoint x="1907" y="312"/></bpmndi:BPMNEdge>
+<bpmndi:BPMNShape id="Group_1_di" bpmnElement="Group_1"><dc:Bounds x="126" y="32" width="343" height="561"/><bpmndi:BPMNLabel><dc:Bounds x="134" y="36" width="327" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Group_2_di" bpmnElement="Group_2"><dc:Bounds x="528" y="32" width="430" height="561"/><bpmndi:BPMNLabel><dc:Bounds x="536" y="36" width="414" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Group_3_di" bpmnElement="Group_3"><dc:Bounds x="980" y="32" width="1029" height="561"/><bpmndi:BPMNLabel><dc:Bounds x="988" y="36" width="1013" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+<bpmndi:BPMNShape id="Group_4_di" bpmnElement="Group_4"><dc:Bounds x="1368" y="233" width="483" height="159"/><bpmndi:BPMNLabel><dc:Bounds x="1376" y="237" width="467" height="14"/></bpmndi:BPMNLabel></bpmndi:BPMNShape>
+</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>

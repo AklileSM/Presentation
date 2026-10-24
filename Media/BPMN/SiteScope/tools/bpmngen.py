@@ -49,6 +49,7 @@ class Diagram:
         self.nodes: dict[str, Node] = {}
         self.flows: list[dict] = []
         self.notes: list[dict] = []
+        self.groups: list[dict] = []
         self._n = 0
 
     # ---- building -------------------------------------------------------------------------
@@ -91,8 +92,17 @@ class Diagram:
         for a, b in zip(ids, ids[1:]):
             self.flow(a, b, **kw)
 
+    def group(self, label, col0, col1, lane0, lane1, inset=12):
+        """Dashed BPMN group around columns col0..col1 (centres) across lanes lane0..lane1."""
+        self.groups.append(dict(label=label, c0=col0, c1=col1, l0=lane0, l1=lane1, inset=inset))
+
     def note(self, text, lane, col, row=0, attach=None, w=260, h=None, dx=0, dy=0):
         self.notes.append(dict(text=text, lane=lane, col=col, row=row, attach=attach, w=w, h=h, dx=dx, dy=dy))
+
+    @staticmethod
+    def _group_x(g, pad=84):
+        base = POOL_X + HEADER + LANE_HEADER + LEFT
+        return base + g["c0"] * CW - pad, base + g["c1"] * CW + pad
 
     # ---- layout ---------------------------------------------------------------------------
     def _layout(self):
@@ -115,6 +125,8 @@ class Diagram:
             lines = max(1, sum(len(p) // max(1, int(nt["w"] / 6.6)) + 1 for p in nt["text"].split("\n")))
             nt["h"] = nt["h"] or 14 * lines + 12
             right = max(right, nt["x"] + nt["w"])
+        for g in self.groups:
+            right = max(right, self._group_x(g)[1] - 40)
         self.pool_w = right - POOL_X + 60
 
     def _route(self, f):
@@ -208,7 +220,12 @@ class Diagram:
             out.append(f'<bpmn:textAnnotation id="{nt["id"]}"><bpmn:text>{_x(nt["text"])}</bpmn:text></bpmn:textAnnotation>')
             if nt["attach"]:
                 out.append(f'<bpmn:association id="Assoc_{i + 1}" sourceRef="{nt["attach"]}" targetRef="{nt["id"]}"/>')
+        for i, g in enumerate(self.groups):
+            out.append(f'<bpmn:group id="Group_{i + 1}" categoryValueRef="CatVal_{i + 1}"/>')
         out.append('</bpmn:process>')
+        for i, g in enumerate(self.groups):
+            out.append(f'<bpmn:category id="Cat_{i + 1}"><bpmn:categoryValue id="CatVal_{i + 1}" '
+                       f'value="{_x(g["label"])}"/></bpmn:category>')
 
         # ---- DI ----
         di.append(f'<bpmndi:BPMNDiagram id="Diagram_{self.id}"><bpmndi:BPMNPlane id="Plane_{self.id}" bpmnElement="Collab_{self.id}">')
@@ -261,6 +278,15 @@ class Diagram:
                 sy = a.b if nt["y"] > a.cy else a.t
                 di.append(f'<bpmndi:BPMNEdge id="Assoc_{i + 1}_di" bpmnElement="Assoc_{i + 1}">'
                           f'<di:waypoint x="{a.cx:.0f}" y="{sy:.0f}"/><di:waypoint x="{ax:.0f}" y="{ay:.0f}"/></bpmndi:BPMNEdge>')
+        for i, g in enumerate(self.groups):
+            x0, x1 = self._group_x(g)
+            y0 = self.lane_box[g["l0"]][0] + g["inset"]
+            ly, lh = self.lane_box[g["l1"]]
+            y1 = ly + lh - g["inset"]
+            di.append(f'<bpmndi:BPMNShape id="Group_{i + 1}_di" bpmnElement="Group_{i + 1}">'
+                      f'<dc:Bounds x="{x0:.0f}" y="{y0:.0f}" width="{x1 - x0:.0f}" height="{y1 - y0:.0f}"/>'
+                      f'<bpmndi:BPMNLabel><dc:Bounds x="{x0 + 8:.0f}" y="{y0 + 4:.0f}" width="{x1 - x0 - 16:.0f}" height="14"/>'
+                      f'</bpmndi:BPMNLabel></bpmndi:BPMNShape>')
         di.append('</bpmndi:BPMNPlane></bpmndi:BPMNDiagram>')
         return "\n".join(out + di + ["</bpmn:definitions>"])
 
