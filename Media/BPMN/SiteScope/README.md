@@ -22,6 +22,7 @@ bpmn.io's viewer.
 | 10 | Robot onboarding, map and capture points | **New.** Pairing token → agent claim → heartbeat; map upload or "Record a new map" wizard (SLAM, drive, save at home within 30 cm / 15°); old capture points retired; place capture points. Replaces the old robot task flow. |
 | 11 | Schedule to mission | **New.** Dispatcher every 15 s: missed (> 30 min late), invalid (robot not Editor, point missing or on an old map → schedule disabled), skipped (busy, or camera / LiDAR unavailable), else queue mission and, if needed, a Connect command. |
 | 12 | Mission execution | **New.** Nav2 health check, per-capture-point navigate → capture → quality gate (observe / retry, up to 3 attempts) → robot upload; continue-on-failure; return home; cancel / stop and the 2-minute watchdog; final status. |
+| 12s | Mission loop (summary) | Slide-sized version of 12 used in the deck: the same flow without the cancel, stop and watchdog paths. |
 | 13 | Robot voice assistant | **New.** Browser speech recognition → rule-based or LLM tool-calling assistant (`ASSISTANT_AGENT` = off / schedules / all) → validation and read-back confirmations → Robots page endpoints; spoken reply from Kokoro TTS or the browser voice. |
 
 ## Issue found while checking the code

@@ -278,3 +278,51 @@ if __name__ == "__main__":
         dg = fn()
         _resolve_via(dg)
         print(dg.write(os.path.join(OUT, names[dg.id] + ".bpmn")))
+
+
+def d12s():
+    """Slide-sized summary of diagram 12 (same flow, fewer details)."""
+    d = Diagram("12s", "SiteScope mission loop (summary of diagram 12)")
+    d.lane("ag", "Robot agent (Go2-W)", 2)
+    d.lane("hw", "Nav2 / Insta360 X4 / LiDAR", 1)
+    d.lane("be", "SiteScope backend", 1)
+    d.start("s", "Mission claimed", "ag", 0)
+    d.xor("hc", "Navigation healthy?", "ag", 1)
+    d.end("bad", "Task failed", "ag", 1, row=1, kind="error", label_pos="right")
+    d.xor("m", "", "ag", 2)
+    d.xor("more", "Next capture point?", "ag", 3, label_pos="above")
+    d.task("nav", "Navigate to capture point (x, y, yaw)", "hw", 4, kind="service")
+    d.task("cap", "Capture 360° photo / LiDAR scan", "hw", 5, kind="service")
+    d.task("q", "Quality check; retake if needed", "ag", 6, row=1, kind="service")
+    d.task("up", "Store with provenance; thumbnail, AI description", "be", 7, kind="service")
+    d.task("home", "Return to home pose", "ag", 8, kind="service")
+    d.task("fin", "Close mission; post results", "be", 9, kind="service")
+    d.end("e", "Evidence available", "be", 10)
+    d.chain("s", "hc")
+    d.flow("hc", "bad", "No", route="v")
+    d.flow("hc", "m", "Yes")
+    d.flow("m", "more")
+    d.flow("more", "nav", "Yes", route="vh", label_at=(8, 60))
+    d.flow("nav", "cap")
+    d.flow("cap", "q", route="hvh")
+    d.flow("q", "up", route="hvh")
+    d.flow("up", "m", route="right_up", via_x=0, via_y=0)
+    d.flow("more", "home", "No", route="h", label_at=(60, -22))
+    d.flow("home", "fin", route="hvh")
+    d.flow("fin", "e")
+    return d
+
+
+def _fix12s(d):
+    d._layout()
+    up, m = d.nodes["up"], d.nodes["m"]
+    for f in d.flows:
+        if (f["src"], f["tgt"]) == ("up", "m"):
+            f["route"] = "under"
+            f["via_y"] = up.b + 22
+    d.lane_box  # noqa
+
+
+if __name__ == "__main__":
+    dg = d12s(); _fix12s(dg)
+    print(dg.write(os.path.join(OUT, "12s-mission-loop-summary.bpmn")))
